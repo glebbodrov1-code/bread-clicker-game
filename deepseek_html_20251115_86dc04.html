@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хлебный кликер с мини-игрой</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5e8c8 0%, #e1c78f 100%);
+            color: #5c3d2e;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #e1c78f;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border: 3px solid #8b4513;
+        }
+        
+        h1 {
+            color: #8b4513;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background-color: #d4b483;
+            border: 2px solid #8b4513;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background-color: #c9a871;
+        }
+        
+        .tab.active {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        .game-content {
+            display: none;
+        }
+        
+        .game-content.active {
+            display: block;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            background-color: #d4b483;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #8b4513;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #8b4513;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #e1c78f;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border: 3px solid #8b4513;
+        }
+        
+        .bread {
+            width: 250px;
+            height: 120px;
+            background: linear-gradient(to bottom, #d4a574, #b17a4a);
+            border-radius: 60px 60px 30px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            position: relative;
+            overflow: hidden;
+            border: 5px solid #8b4513;
+        }
+        
+        .bread:hover {
+            transform: scale(1.05);
+        }
+        
+        .bread:active {
+            transform: scale(0.95);
+        }
+        
+        .bread-crust {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 25%;
+            background: linear-gradient(to bottom, #a0522d, #8b4513);
+            border-radius: 60px 60px 0 0;
+        }
+        
+        .bread-texture {
+            position: absolute;
+            width: 90%;
+            height: 70%;
+            top: 20%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-content: space-around;
+        }
+        
+        .bread-pore {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(139, 69, 19, 0.3);
+            border-radius: 50%;
+            margin: 2px;
+        }
+        
+        .bread-cut {
+            position: absolute;
+            width: 80%;
+            height: 8px;
+            background-color: #8b4513;
+            border-radius: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .minigame-container {
+            width: 100%;
+            height: 400px;
+            background-color: #7a9e7e;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #5c3d2e;
+            margin-bottom: 20px;
+        }
+        
+        #minigame {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .minigame-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #d4b483;
+            border-radius: 8px;
+            border: 2px solid #8b4513;
+        }
+        
+        .minigame-controls {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .minigame-btn {
+            padding: 10px 20px;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .minigame-btn:hover {
+            background-color: #a0522d;
+        }
+        
+        .minigame-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .car {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background-color: #ff0000;
+            border-radius: 5px 5px 0 0;
+            z-index: 10;
+        }
+        
+        .car::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 15px;
+            background-color: #cc0000;
+            top: -10px;
+            left: -5px;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .car::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #222;
+            border-radius: 50%;
+            bottom: -5px;
+        }
+        
+        .car-wheel-1 {
+            left: 5px;
+        }
+        
+        .car-wheel-2 {
+            right: 5px;
+        }
+        
+        .bread-piece {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(to bottom, #d4a574, #b17a4a);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 1px solid #8b4513;
+        }
+        
+        .bread-piece::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: rgba(139, 69, 19, 0.5);
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+        
+        .road {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #5a5a5a, #444);
+        }
+        
+        .road-line {
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            background-color: #fff;
+            opacity: 0.7;
+        }
+        
+        .shop {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .shop-category {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            background-color: #8b4513;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .shop-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .shop-item {
+            background: linear-gradient(to bottom, #e1c78f, #d4b483);
+            border: 3px solid #8b4513;
+            border-radius: 10px;
+            padding: 15px;
+            width: 220px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .shop-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            background: linear-gradient(to bottom, #d4b483, #e1c78f);
+        }
+        
+        .shop-item:disabled {
+            background: linear-gradient(to bottom, #cccccc, #aaaaaa);
+            cursor: not-allowed;
+            color: #666;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .shop-item:disabled:hover {
+            transform: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .item-desc {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #5c3d2e;
+        }
+        
+        .item-cost {
+            color: #8b4513;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .item-level {
+            font-size: 0.9rem;
+            color: #5c3d2e;
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e1c78f;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #8b4513;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .click-effect {
+            position: absolute;
+            color: #8b4513;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 1px 1px 0 white;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(1.5);
+            }
+        }
+        
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 2px solid #8b4513;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .skin-default {
+            background: linear-gradient(45deg, #d4a574, #a0522d);
+        }
+        
+        .skin-golden {
+            background: linear-gradient(45deg, #ffd700, #ffec8b, #daa520);
+        }
+        
+        .skin-chocolate {
+            background: linear-gradient(45deg, #8b4513, #a0522d, #5c3d2e);
+        }
+        
+        .skin-rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #9900ff);
+        }
+        
+        .selected-skin {
+            border: 4px solid #2e8b57;
+            box-shadow: 0 0 15px #2e8b57;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #5c3d2e;
+            width: 100%;
+            background-color: #e1c78f;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #8b4513;
+        }
+        
+        .max-level {
+            color: #2e8b57;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .shop-item {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍞 Хлебный кликер + Мини-игра</h1>
+            <p>Кликай на хлеб или играй в мини-игру, чтобы зарабатывать очки!</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="clicker">Хлебный кликер</div>
+            <div class="tab" data-tab="minigame">Хлебный гонщик</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-label">Очки</div>
+                <div class="stat-value" id="points">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Очков за клик</div>
+                <div class="stat-value" id="points-per-click">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Очков в секунду</div>
+                <div class="stat-value" id="points-per-second">0</div>
+            </div>
+        </div>
+        
+        <div id="clicker-content" class="game-content active">
+            <div class="game-area">
+                <div class="bread" id="bread">
+                    <div class="bread-crust"></div>
+                    <div class="bread-texture" id="bread-texture"></div>
+                    <div class="bread-cut"></div>
+                </div>
+                <p>Кликай на хлеб, чтобы зарабатывать очки!</p>
+            </div>
+            
+            <div class="shop">
+                <div class="shop-category">
+                    <div class="category-title">Улучшения клика</div>
+                    <div class="shop-items">
+                        <div class="shop-item" id="upgrade-click-1">
+                            <div class="item-name">Лучшая мука</div>
+                            <div class="item-desc">+1 очко за клик</div>
+                            <div class="item-cost">Стоимость: <span id="upgrade-click-1-cost">10</span> очков</div>
+                            <div class="item-level">Уровень: <span id="upgrade-click-1-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="upgrade-click-1-progress"></div>
+                            </div>
+                        </div>
+                        <div class="shop-item" id="upgrade-click-2">
+                            <div class="item-name">Профессиональная печь</div>
+                            <div class="item-desc">+2 очка за клик</div>
+                            <div class="item-cost">Стоимость: <span id="upgrade-click-2-cost">50</span> очков</div>
+                            <div class="item-level">Уровень: <span id="upgrade-click-2-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="upgrade-click-2-progress"></div>
+                            </div>
+                        </div>
+                        <div class="shop-item" id="upgrade-click-3">
+                            <div class="item-name">Мастер-пекарь</div>
+                            <div class="item-desc">+5 очков за клик</div>
+                            <div class="item-cost">Стоимость: <span id="upgrade-click-3-cost">200</span> очков</div>
+                            <div class="item-level">Уровень: <span id="upgrade-click-3-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="upgrade-click-3-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="shop-category">
+                    <div class="category-title">Автоматический заработок</div>
+                    <div class="shop-items">
+                        <div class="shop-item" id="auto-click-1">
+                            <div class="item-name">Помощник пекаря</div>
+                            <div class="item-desc">+1 очко в секунду</div>
+                            <div class="item-cost">Стоимость: <span id="auto-click-1-cost">30</span> очков</div>
+                            <div class="item-level">Уровень: <span id="auto-click-1-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="auto-click-1-progress"></div>
+                            </div>
+                        </div>
+                        <div class="shop-item" id="auto-click-2">
+                            <div class="item-name">Хлебный завод</div>
+                            <div class="item-desc">+3 очка в секунду</div>
+                            <div class="item-cost">Стоимость: <span id="auto-click-2-cost">100</span> очков</div>
+                            <div class="item-level">Уровень: <span id="auto-click-2-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="auto-click-2-progress"></div>
+                            </div>
+                        </div>
+                        <div class="shop-item" id="auto-click-3">
+                            <div class="item-name">Хлебная империя</div>
+                            <div class="item-desc">+10 очков в секунду</div>
+                            <div class="item-cost">Стоимость: <span id="auto-click-3-cost">500</span> очков</div>
+                            <div class="item-level">Уровень: <span id="auto-click-3-level">0</span>/25</div>
+                            <div class="progress-bar">
+                                <div class="progress" id="auto-click-3-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="shop-category">
+                    <div class="category-title">Скины для хлеба</div>
+                    <div class="shop-items">
+                        <div class="shop-item skin-item selected-skin" id="skin-default">
+                            <div class="skin-preview skin-default"></div>
+                            <div class="item-name">Обычный хлеб</div>
+                            <div class="item-cost">Бесплатно</div>
+                        </div>
+                        <div class="shop-item skin-item" id="skin-golden">
+                            <div class="skin-preview skin-golden"></div>
+                            <div class="item-name">Золотой хлеб</div>
+                            <div class="item-cost">Стоимость: 1000 очков</div>
+                        </div>
+                        <div class="shop-item skin-item" id="skin-chocolate">
+                            <div class="skin-preview skin-chocolate"></div>
+                            <div class="item-name">Шоколадный хлеб</div>
+                            <div class="item-cost">Стоимость: 2500 очков</div>
+                        </div>
+                        <div class="shop-item skin-item" id="skin-rainbow">
+                            <div class="skin-preview skin-rainbow"></div>
+                            <div class="item-name">Радужный хлеб</div>
+                            <div class="item-cost">Стоимость: 5000 очков</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="minigame-content" class="game-content">
+            <div class="minigame-info">
+                <div>Собрано хлеба: <span id="minigame-score">0</span></div>
+                <div>Время: <span id="minigame-time">60</span> сек</div>
+                <div>Награда: <span id="minigame-reward">0</span> очков</div>
+            </div>
+            <div class="minigame-container">
+                <canvas id="minigame"></canvas>
+            </div>
+            <div class="minigame-controls">
+                <button class="minigame-btn" id="start-minigame">Начать мини-игру</button>
+                <p>Управляй машинкой с помощью мыши! Собирай куски хлеба для получения очков.</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Игра автоматически сохраняет ваш прогресс! Максимальный уровень улучшений - 25.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Игровые переменные
+        let points = 0;
+        let pointsPerClick = 1;
+        let pointsPerSecond = 0;
+        
+        // Улучшения клика
+        const clickUpgrades = [
+            { 
+                id: 'upgrade-click-1', 
+                baseCost: 10, 
+                cost: 10, 
+                points: 1, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.5
+            },
+            { 
+                id: 'upgrade-click-2', 
+                baseCost: 50, 
+                cost: 50, 
+                points: 2, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.6
+            },
+            { 
+                id: 'upgrade-click-3', 
+                baseCost: 200, 
+                cost: 200, 
+                points: 5, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.7
+            }
+        ];
+        
+        // Автоматические улучшения
+        const autoUpgrades = [
+            { 
+                id: 'auto-click-1', 
+                baseCost: 30, 
+                cost: 30, 
+                points: 1, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.5
+            },
+            { 
+                id: 'auto-click-2', 
+                baseCost: 100, 
+                cost: 100, 
+                points: 3, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.6
+            },
+            { 
+                id: 'auto-click-3', 
+                baseCost: 500, 
+                cost: 500, 
+                points: 10, 
+                level: 0, 
+                maxLevel: 25,
+                costMultiplier: 1.7
+            }
+        ];
+        
+        // Скины
+        const skins = [
+            { id: 'skin-default', cost: 0, owned: true, selected: true },
+            { id: 'skin-golden', cost: 1000, owned: false, selected: false },
+            { id: 'skin-chocolate', cost: 2500, owned: false, selected: false },
+            { id: 'skin-rainbow', cost: 5000, owned: false, selected: false }
+        ];
+        
+        // Переменные для мини-игры
+        let minigameActive = false;
+        let minigameScore = 0;
+        let minigameTime = 60;
+        let minigameTimer = null;
+        let carX = 0;
+        let carY = 0;
+        let breadPieces = [];
+        let roadLines = [];
+        let canvas, ctx;
+        
+        // Загрузка сохранения
+        function loadGame() {
+            const savedGame = localStorage.getItem('breadClickerSave');
+            if (savedGame) {
+                const gameData = JSON.parse(savedGame);
+                
+                points = gameData.points || 0;
+                pointsPerClick = gameData.pointsPerClick || 1;
+                pointsPerSecond = gameData.pointsPerSecond || 0;
+                
+                // Загрузка улучшений
+                if (gameData.clickUpgrades) {
+                    for (let i = 0; i < clickUpgrades.length; i++) {
+                        if (gameData.clickUpgrades[i]) {
+                            clickUpgrades[i].level = gameData.clickUpgrades[i].level;
+                            clickUpgrades[i].cost = gameData.clickUpgrades[i].cost;
+                        }
+                    }
+                }
+                
+                if (gameData.autoUpgrades) {
+                    for (let i = 0; i < autoUpgrades.length; i++) {
+                        if (gameData.autoUpgrades[i]) {
+                            autoUpgrades[i].level = gameData.autoUpgrades[i].level;
+                            autoUpgrades[i].cost = gameData.autoUpgrades[i].cost;
+                        }
+                    }
+                }
+                
+                // Загрузка скинов
+                if (gameData.skins) {
+                    for (let i = 0; i < skins.length; i++) {
+                        if (gameData.skins[i]) {
+                            skins[i].owned = gameData.skins[i].owned;
+                            skins[i].selected = gameData.skins[i].selected;
+                        }
+                    }
+                }
+                
+                updateUI();
+            }
+        }
+        
+        // Сохранение игры
+        function saveGame() {
+            const gameData = {
+                points: points,
+                pointsPerClick: pointsPerClick,
+                pointsPerSecond: pointsPerSecond,
+                clickUpgrades: clickUpgrades,
+                autoUpgrades: autoUpgrades,
+                skins: skins
+            };
+            
+            localStorage.setItem('breadClickerSave', JSON.stringify(gameData));
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            // Обновление очков
+            document.getElementById('points').textContent = Math.floor(points);
+            document.getElementById('points-per-click').textContent = pointsPerClick;
+            document.getElementById('points-per-second').textContent = pointsPerSecond;
+            
+            // Обновление улучшений клика
+            for (let i = 0; i < clickUpgrades.length; i++) {
+                const upgrade = clickUpgrades[i];
+                const element = document.getElementById(upgrade.id);
+                const costElement = document.getElementById(`${upgrade.id}-cost`);
+                const levelElement = document.getElementById(`${upgrade.id}-level`);
+                const progressElement = document.getElementById(`${upgrade.id}-progress`);
+                
+                costElement.textContent = Math.floor(upgrade.cost);
+                levelElement.textContent = upgrade.level;
+                
+                // Обновление прогресс-бара
+                const progressPercent = (upgrade.level / upgrade.maxLevel) * 100;
+                progressElement.style.width = `${progressPercent}%`;
+                
+                // Если достигнут максимальный уровень
+                if (upgrade.level >= upgrade.maxLevel) {
+                    element.disabled = true;
+                    levelElement.innerHTML = '<span class="max-level">МАКС</span>';
+                    costElement.textContent = 'МАКС';
+                } else {
+                    // Блокировка кнопки, если недостаточно очков
+                    if (points < upgrade.cost) {
+                        element.disabled = true;
+                    } else {
+                        element.disabled = false;
+                    }
+                }
+            }
+            
+            // Обновление автоматических улучшений
+            for (let i = 0; i < autoUpgrades.length; i++) {
+                const upgrade = autoUpgrades[i];
+                const element = document.getElementById(upgrade.id);
+                const costElement = document.getElementById(`${upgrade.id}-cost`);
+                const levelElement = document.getElementById(`${upgrade.id}-level`);
+                const progressElement = document.getElementById(`${upgrade.id}-progress`);
+                
+                costElement.textContent = Math.floor(upgrade.cost);
+                levelElement.textContent = upgrade.level;
+                
+                // Обновление прогресс-бара
+                const progressPercent = (upgrade.level / upgrade.maxLevel) * 100;
+                progressElement.style.width = `${progressPercent}%`;
+                
+                // Если достигнут максимальный уровень
+                if (upgrade.level >= upgrade.maxLevel) {
+                    element.disabled = true;
+                    levelElement.innerHTML = '<span class="max-level">МАКС</span>';
+                    costElement.textContent = 'МАКС';
+                } else {
+                    // Блокировка кнопки, если недостаточно очков
+                    if (points < upgrade.cost) {
+                        element.disabled = true;
+                    } else {
+                        element.disabled = false;
+                    }
+                }
+            }
+            
+            // Обновление скинов
+            for (let i = 0; i < skins.length; i++) {
+                const skin = skins[i];
+                const element = document.getElementById(skin.id);
+                
+                // Если скин выбран, добавляем класс selected
+                if (skin.selected) {
+                    element.classList.add('selected-skin');
+                } else {
+                    element.classList.remove('selected-skin');
+                }
+                
+                // Если скин куплен, разблокируем его
+                if (skin.owned) {
+                    element.disabled = false;
+                    // Убираем стоимость для купленных скинов
+                    const costElement = element.querySelector('.item-cost');
+                    if (costElement && skin.id !== 'skin-default') {
+                        costElement.textContent = 'Куплено';
+                    }
+                } else {
+                    // Блокируем скин, если не хватает очков
+                    if (points < skin.cost) {
+                        element.disabled = true;
+                    } else {
+                        element.disabled = false;
+                    }
+                }
+            }
+            
+            // Сохранение игры после каждого обновления UI
+            saveGame();
+        }
+        
+        // Клик по хлебу
+        function clickBread(event) {
+            // Добавление очков
+            points += pointsPerClick;
+            
+            // Создание эффекта "+X" при клике
+            const clickEffect = document.createElement('div');
+            clickEffect.className = 'click-effect';
+            clickEffect.textContent = `+${pointsPerClick}`;
+            clickEffect.style.left = `${event.offsetX}px`;
+            clickEffect.style.top = `${event.offsetY}px`;
+            
+            document.getElementById('bread').appendChild(clickEffect);
+            
+            // Удаление эффекта после анимации
+            setTimeout(() => {
+                clickEffect.remove();
+            }, 1000);
+            
+            updateUI();
+        }
+        
+        // Покупка улучшения клика
+        function buyClickUpgrade(index) {
+            const upgrade = clickUpgrades[index];
+            
+            if (points >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
+                points -= upgrade.cost;
+                upgrade.level++;
+                pointsPerClick += upgrade.points;
+                
+                // Увеличиваем стоимость для следующего уровня
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.level));
+                
+                updateUI();
+            }
+        }
+        
+        // Покупка автоматического улучшения
+        function buyAutoUpgrade(index) {
+            const upgrade = autoUpgrades[index];
+            
+            if (points >= upgrade.cost && upgrade.level < upgrade.maxLevel) {
+                points -= upgrade.cost;
+                upgrade.level++;
+                pointsPerSecond += upgrade.points;
+                
+                // Увеличиваем стоимость для следующего уровня
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.level));
+                
+                updateUI();
+            }
+        }
+        
+        // Покупка скина
+        function buySkin(index) {
+            const skin = skins[index];
+            
+            // Если скин уже куплен, просто выбираем его
+            if (skin.owned) {
+                // Снимаем выделение со всех скинов
+                for (let i = 0; i < skins.length; i++) {
+                    skins[i].selected = false;
+                }
+                
+                // Выбираем текущий скин
+                skin.selected = true;
+                
+                // Применяем скин к хлебу
+                applySkin(skin.id);
+            } 
+            // Если скин не куплен, но хватает очков
+            else if (points >= skin.cost) {
+                points -= skin.cost;
+                skin.owned = true;
+                
+                // Снимаем выделение со всех скинов
+                for (let i = 0; i < skins.length; i++) {
+                    skins[i].selected = false;
+                }
+                
+                // Выбираем текущий скин
+                skin.selected = true;
+                
+                // Применяем скин к хлебу
+                applySkin(skin.id);
+            }
+            
+            updateUI();
+        }
+        
+        // Применение скина к хлебу
+        function applySkin(skinId) {
+            const bread = document.getElementById('bread');
+            
+            // Удаляем предыдущие классы скинов
+            bread.classList.remove('skin-default', 'skin-golden', 'skin-chocolate', 'skin-rainbow');
+            
+            // Добавляем новый класс скина
+            bread.classList.add(skinId);
+        }
+        
+        // Автоматическое начисление очков
+        function autoEarnPoints() {
+            points += pointsPerSecond / 10; // Делаем 10 раз в секунду для плавности
+            updateUI();
+        }
+        
+        // Создание текстуры хлеба
+        function createBreadTexture() {
+            const texture = document.getElementById('bread-texture');
+            texture.innerHTML = '';
+            
+            for (let i = 0; i < 40; i++) {
+                const pore = document.createElement('div');
+                pore.className = 'bread-pore';
+                texture.appendChild(pore);
+            }
+        }
+        
+        // Инициализация мини-игры
+        function initMinigame() {
+            canvas = document.getElementById('minigame');
+            ctx = canvas.getContext('2d');
+            
+            // Установка размеров canvas
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            // Инициализация дорожных линий
+            for (let i = 0; i < 5; i++) {
+                roadLines.push({
+                    y: i * 100,
+                    speed: 3
+                });
+            }
+            
+            // Обработчик движения мыши
+            canvas.addEventListener('mousemove', (e) => {
+                if (!minigameActive) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                carX = e.clientX - rect.left - 25;
+                carY = e.clientY - rect.top - 15;
+                
+                // Ограничение движения машинки в пределах canvas
+                carX = Math.max(0, Math.min(canvas.width - 50, carX));
+                carY = Math.max(0, Math.min(canvas.height - 30, carY));
+            });
+        }
+        
+        // Отрисовка мини-игры
+        function drawMinigame() {
+            if (!minigameActive) return;
+            
+            // Очистка canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Отрисовка дороги
+            ctx.fillStyle = '#5a5a5a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Отрисовка дорожных линий
+            ctx.fillStyle = '#ffffff';
+            roadLines.forEach(line => {
+                ctx.fillRect(canvas.width / 2 - 2, line.y, 4, 30);
+                
+                // Обновление позиции линии
+                line.y += line.speed;
+                if (line.y > canvas.height) {
+                    line.y = -30;
+                }
+            });
+            
+            // Отрисовка кусков хлеба
+            breadPieces.forEach((piece, index) => {
+                ctx.fillStyle = '#d4a574';
+                ctx.beginPath();
+                ctx.arc(piece.x, piece.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // Текстура хлеба
+                ctx.fillStyle = 'rgba(139, 69, 19, 0.5)';
+                ctx.beginPath();
+                ctx.arc(piece.x - 3, piece.y - 3, 2, 0, Math.PI * 2);
+                ctx.arc(piece.x + 3, piece.y + 2, 2, 0, Math.PI * 2);
+                ctx.arc(piece.x + 1, piece.y - 4, 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Обновление позиции
+                piece.y += piece.speed;
+                
+                // Проверка столкновения с машинкой
+                if (Math.abs(piece.x - (carX + 25)) < 25 && Math.abs(piece.y - (carY + 15)) < 20) {
+                    breadPieces.splice(index, 1);
+                    minigameScore++;
+                    document.getElementById('minigame-score').textContent = minigameScore;
+                }
+                
+                // Удаление вышедших за пределы кусков
+                if (piece.y > canvas.height + 10) {
+                    breadPieces.splice(index, 1);
+                }
+            });
+            
+            // Отрисовка машинки
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(carX, carY, 50, 30);
+            
+            ctx.fillStyle = '#cc0000';
+            ctx.beginPath();
+            ctx.moveTo(carX - 5, carY);
+            ctx.lineTo(carX + 55, carY);
+            ctx.lineTo(carX + 45, carY - 10);
+            ctx.lineTo(carX + 5, carY - 10);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Колёса
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.arc(carX + 10, carY + 30, 5, 0, Math.PI * 2);
+            ctx.arc(carX + 40, carY + 30, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Стекло
+            ctx.fillStyle = 'rgba(173, 216, 230, 0.7)';
+            ctx.fillRect(carX + 10, carY - 8, 30, 8);
+            
+            // Запрос следующего кадра
+            requestAnimationFrame(drawMinigame);
+        }
+        
+        // Запуск мини-игры
+        function startMinigame() {
+            if (minigameActive) return;
+            
+            minigameActive = true;
+            minigameScore = 0;
+            minigameTime = 60;
+            
+            document.getElementById('minigame-score').textContent = minigameScore;
+            document.getElementById('minigame-time').textContent = minigameTime;
+            document.getElementById('start-minigame').disabled = true;
+            
+            // Сброс позиции машинки
+            carX = canvas.width / 2 - 25;
+            carY = canvas.height - 100;
+            
+            // Очистка кусков хлеба
+            breadPieces = [];
+            
+            // Запуск таймера
+            minigameTimer = setInterval(() => {
+                minigameTime--;
+                document.getElementById('minigame-time').textContent = minigameTime;
+                
+                if (minigameTime <= 0) {
+                    endMinigame();
+                }
+            }, 1000);
+            
+            // Генерация кусков хлеба
+            const breadGenerator = setInterval(() => {
+                if (!minigameActive) {
+                    clearInterval(breadGenerator);
+                    return;
+                }
+                
+                breadPieces.push({
+                    x: Math.random() * (canvas.width - 20) + 10,
+                    y: -10,
+                    speed: 2 + Math.random() * 3
+                });
+            }, 800);
+            
+            // Запуск отрисовки
+            drawMinigame();
+        }
+        
+        // Завершение мини-игры
+        function endMinigame() {
+            minigameActive = false;
+            clearInterval(minigameTimer);
+            
+            // Начисление очков
+            const reward = minigameScore * 10;
+            points += reward;
+            
+            document.getElementById('minigame-reward').textContent = reward;
+            document.getElementById('start-minigame').disabled = false;
+            
+            updateUI();
+        }
+        
+        // Переключение вкладок
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.game-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Убираем активный класс со всех вкладок и контента
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // Добавляем активный класс к выбранной вкладке и контенту
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-content`).classList.add('active');
+                    
+                    // Если переключаемся на мини-игру, инициализируем её
+                    if (tab.dataset.tab === 'minigame') {
+                        initMinigame();
+                    }
+                });
+            });
+        }
+        
+        // Инициализация игры
+        function initGame() {
+            // Загрузка сохранения
+            loadGame();
+            
+            // Назначение обработчиков событий
+            document.getElementById('bread').addEventListener('click', clickBread);
+            
+            // Обработчики для улучшений клика
+            for (let i = 0; i < clickUpgrades.length; i++) {
+                document.getElementById(clickUpgrades[i].id).addEventListener('click', () => buyClickUpgrade(i));
+            }
+            
+            // Обработчики для автоматических улучшений
+            for (let i = 0; i < autoUpgrades.length; i++) {
+                document.getElementById(autoUpgrades[i].id).addEventListener('click', () => buyAutoUpgrade(i));
+            }
+            
+            // Обработчики для скинов
+            for (let i = 0; i < skins.length; i++) {
+                document.getElementById(skins[i].id).addEventListener('click', () => buySkin(i));
+            }
+            
+            // Обработчик для мини-игры
+            document.getElementById('start-minigame').addEventListener('click', startMinigame);
+            
+            // Настройка вкладок
+            setupTabs();
+            
+            // Запуск автоматического заработка
+            setInterval(autoEarnPoints, 100);
+            
+            // Применение выбранного скина
+            for (let i = 0; i < skins.length; i++) {
+                if (skins[i].selected) {
+                    applySkin(skins[i].id);
+                    break;
+                }
+            }
+            
+            // Создание текстуры хлеба
+            createBreadTexture();
+            
+            // Первоначальное обновление UI
+            updateUI();
+        }
+        
+        // Запуск игры при загрузке страницы
+        window.onload = initGame;
+    </script>
+</body>
+</html>
